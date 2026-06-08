@@ -1,0 +1,120 @@
+document.addEventListener('DOMContentLoaded', () => {
+
+    // --- ACESSIBILIDADE ENGINE ---
+    const body = document.body;
+    const btnAumentar = document.getElementById('btn-aumentar');
+    const btnDiminuir = document.getElementById('btn-diminuir');
+    const btnTema = document.getElementById('btn-tema');
+    const btnOuvir = document.getElementById('btn-ouvir');
+    const btnParar = document.getElementById('btn-parar');
+
+    // Font Sizing Control
+    btnAumentar.addEventListener('click', () => {
+        if (body.classList.contains('font-small')) {
+            body.classList.remove('font-small');
+        } else {
+            body.classList.add('font-large');
+        }
+    });
+
+    btnDiminuir.addEventListener('click', () => {
+        if (body.classList.contains('font-large')) {
+            body.classList.remove('font-large');
+        } else {
+            body.classList.add('font-small');
+        }
+    });
+
+    // Dark/Light Theme Toggle
+    btnTema.addEventListener('click', () => {
+        body.classList.toggle('dark-mode');
+    });
+
+    // SpeechSynthesis Voice Feature
+    let readingUtterance = null;
+
+    btnOuvir.addEventListener('click', () => {
+        // Stop current before starting a new one
+        window.speechSynthesis.cancel();
+
+        const conteudoStream = document.getElementById('conteudo-principal');
+        if (!conteudoStream) return;
+
+        // Extracts all structural pure text fragments safely
+        const textBlocks = Array.from(conteudoStream.querySelectorAll('h2, p, .card h3, .card p, blockquote'))
+                                .map(el => el.textContent.trim())
+                                .join('. ');
+
+        if (textBlocks.length > 0) {
+            readingUtterance = new SpeechSynthesisUtterance(textBlocks);
+            readingUtterance.lang = 'pt-BR';
+            readingUtterance.rate = 1.0;
+
+            window.speechSynthesis.speak(readingUtterance);
+            btnOuvir.style.backgroundColor = '#1E4620'; // Visual activation signifier
+        }
+    });
+
+    btnParar.addEventListener('click', () => {
+        window.speechSynthesis.cancel();
+        btnOuvir.style.backgroundColor = 'transparent';
+    });
+
+
+    // --- FORM INTERACTIVE ENGINE ---
+    const form = document.getElementById('cadastro-form');
+    const formFeedback = document.getElementById('form-feedback');
+
+    form.addEventListener('submit', (e) => {
+        e.preventDefault();
+
+        // Safe Field Valids Verification
+        const nome = document.getElementById('nome').value.trim();
+        const email = document.getElementById('email').value.trim();
+        const cidade = document.getElementById('cidade').value.trim();
+        const estado = document.getElementById('estado').value.trim();
+        const pais = document.getElementById('pais').value.trim();
+
+        if (!nome || !email || !cidade || !estado || !pais) {
+            formFeedback.className = 'form-feedback error';
+            formFeedback.textContent = 'Por favor, preencha todos os campos obrigatórios.';
+            return;
+        }
+
+        if (!validateEmail(email)) {
+            formFeedback.className = 'form-feedback error';
+            formFeedback.textContent = 'Por favor, insira um endereço de e-mail válido.';
+            return;
+        }
+
+        // Simulating highly performant secure asynchronous processing
+        formFeedback.className = 'form-feedback success';
+        formFeedback.textContent = 'Inscrição realizada com sucesso! Obrigado pelo interesse.';
+        
+        // Form resets smoothly
+        form.reset();
+        document.getElementById('pais').value = 'Brasil'; // Re-defaulting
+    });
+
+    function validateEmail(email) {
+        const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        return re.test(email);
+    }
+
+
+    // --- VISUAL HOVER EFFECTS & CARD ACCESSIBILITY ---
+    const cards = document.querySelectorAll('.card');
+    cards.forEach(card => {
+        card.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                card.click();
+            }
+        });
+        
+        card.addEventListener('click', () => {
+            // Interactive micro-experience placeholder action
+            const title = card.querySelector('h3').textContent;
+            console.log(`Explorando o detalhe de: ${title}`);
+        });
+    });
+});
